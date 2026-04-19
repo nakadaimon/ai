@@ -6,7 +6,7 @@ This folder contains instructions and frameworks for building structured AI agen
 To provide robust system prompts that help LLMs act as autonomous agents capable of complex task reasoning and tool use.
 
 ## 📂 Contents
-*   `symbiosis/` – Agent architecture file that tries to fix the continuity problems and ownership of personal data in LLM:s. Boostraps an structure containing an optimized router and three persistent layers: Character, harness, and a cognitive memory system codified by a symbiotic relationship bettween AI and human.
+*    **[symbiosis](./symbiosis/)** – Agent architecture file that tries to fix the continuity problems and ownership of personal data in LLM:s. Boostraps an structure containing an optimized router and three persistent layers: Character, harness, and a cognitive memory system codified by a symbiotic relationship bettween AI and human.
 
 ## 🛠 Usage
 1. Copy the relevant architecture prompt.
