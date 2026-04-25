@@ -1,10 +1,31 @@
-# 🤖 AI Instruction Library
+# SYMBIOSIS
 
-A collection of optimized prompts and system instructions to enhance AI performance across different models.
+> Your LLM has Leonard Shelby's memory problem. Here's the symbiotic architecture I use to fix it.
 
-## 📂 Categories
+The sessions keep ending. The next one starts from zero. Context gets re-explained, preferences re-established, decisions re-litigated. Good work gets lost. Bad work gets repeated. The problem isn't the prompt — it's that the model has amnesia and I don't.
 
-*   **[agent architecture](./agent-architecture/)** – Ideas, instructions, and snippets to improve your agent harness.
+**Symbiosis** is a router that connects three layers — character, harness, and a memory system that mirrors cognitive science — bound by a contract that makes the human and the model accountable to each other across sessions. The structure is the tattoos. The contract is what makes them mean something.
+
+The model is the motor. It's swappable — Claude today, something else tomorrow. The architecture isn't.
+
+## What's inside
+
+- **[The manifesto](agent-architecture/symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
+- **[Changelog](agent-architecture/symbiosis/CHANGELOG.md)** — version history.
+- **[Recipes](agent-architecture/symbiosis/recipes/)** — the onboarding test orchestrator that drove the iteration.
+
+## How to start
+
+Don't copy these files. Let your model draft yours. The scaffold is the contribution; the content is yours to define.
+
+→ Start with **[the manifesto](agent-architecture/symbiosis/)**.
+
+---
+
+License: MIT  
+Author: Nakadai
+
+---
 
 ## 💡 How to Contribute
 
