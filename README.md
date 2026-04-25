@@ -12,7 +12,7 @@ The model is the motor. It's swappable — Claude today, something else tomorrow
 
 - **[The manifesto](agent-architecture/symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
 - **[Changelog](agent-architecture/symbiosis/CHANGELOG.md)** — version history.
-- **[Recipes](agent-architecture/symbiosis/recipes/)** — the onboarding test orchestrator that drove the iteration.
+- **[Recipes](agent-architecture/symbiosis/recipes/symbiosis-onboarding-test-orchestrator.md)** — the onboarding test orchestrator that drove the iteration.
 
 ## How to start
 
