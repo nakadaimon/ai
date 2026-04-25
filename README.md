@@ -1,3 +1,5 @@
+![ SYMBIOSIS](SYMBIOSIS.jpeg)
+
 # SYMBIOSIS
 
 > Your LLM has Leonard Shelby's memory problem. Here's the symbiotic architecture I use to fix it.
