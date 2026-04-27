@@ -10,22 +10,24 @@ The sessions keep ending. The next one starts from zero. Context gets re-explain
 
 The model is the motor. It's swappable — Claude today, something else tomorrow. The architecture isn't.
 
-## What's inside
-
-- **[The manifesto](agent-architecture/symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
-- **[Changelog](agent-architecture/symbiosis/CHANGELOG.md)** — version history.
-- **[Recipes](agent-architecture/symbiosis/recipes/symbiosis-onboarding-test-orchestrator.md)** — the onboarding test orchestrator that drove the iteration.
-
 ## How to start
 
 Don't copy these files. Let your model draft yours. The scaffold is the contribution; the content is yours to define.
 
 → Start with **[the manifesto](agent-architecture/symbiosis/)**.
 
----
+## Agent architecture
 
-License: MIT  
-Author: Nakadai
+- **[The manifesto](agent-architecture/symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
+- **[Changelog](agent-architecture/symbiosis/CHANGELOG.md)** — version history.
+- **[Recipes](agent-architecture/symbiosis/recipes/symbiosis-onboarding-test-orchestrator.md)** — the onboarding test orchestrator that drove the iteration.
+
+
+
+## Skills
+
+- **[Auto Graph Wiki](skills/auto-graph-wiki/)** — Automated regeneration of graph from frontmatter — 20x performance when querying LLM-wikis with NLAH and plain scripts.
+
 
 ---
 
