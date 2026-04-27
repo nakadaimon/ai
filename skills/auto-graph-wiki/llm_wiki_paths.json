@@ -1,0 +1,10 @@
+{
+  "_comment": "Configure your wiki paths here. The default points at the bundled example vault — replace with your own when ready. Vault paths can be absolute, ~/ for home, or relative to this config file.",
+  "index_dir": "./indexes",
+  "scopes": {
+    "llm-wiki": {
+      "vault": "./examples/llm-wiki",
+      "description": "Example wiki bundled with the skill — replace with your own"
+    }
+  }
+}
