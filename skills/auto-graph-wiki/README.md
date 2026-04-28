@@ -1,3 +1,5 @@
+![ Auto Graph Wiki](autographwiki.jpeg)
+
 # auto-graph-wiki
 
 A retrieval layer for an LLM-wiki. Adds a TF-IDF index over markdown frontmatter and body, plus a search interface that returns relevant snippets at a fraction of the token cost of full-file reads.
