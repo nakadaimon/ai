@@ -14,15 +14,12 @@ The model is the motor. It's swappable — Claude today, something else tomorrow
 
 Don't copy these files. Let your model draft yours. The scaffold is the contribution; the content is yours to define.
 
-→ Start with **[the manifesto](agent-architecture/symbiosis/)**.
+→ Start with **[the manifesto](symbiosis/)**.
 
-## Agent architecture
+## Symbiosis
 
-- **[The manifesto](agent-architecture/symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
-- **[Changelog](agent-architecture/symbiosis/CHANGELOG.md)** — version history.
-- **[Recipes](agent-architecture/symbiosis/recipes/symbiosis-onboarding-test-orchestrator.md)** — the onboarding test orchestrator that drove the iteration.
-
-
+- **[The manifesto](symbiosis/)** — full architecture. Layers, four memory domains, two loops, exit criteria. ~15-minute read.
+- **[Changelog](symbiosis/CHANGELOG.md)** — version history.
 
 ## Skills
 
