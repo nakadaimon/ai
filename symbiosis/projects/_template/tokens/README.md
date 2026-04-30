@@ -12,7 +12,6 @@ raw sources  →  tokens (translated substrate)  →  iteration phases consume
 
 The pattern is generic; the shape varies by domain:
 
-- **Design projects:** CDN tokens (CSS) → YAML with concrete values for the delivery format
 - **Report projects:** Spreadsheet of metrics → typed markdown/yaml ready for report generation
 - **UI projects:** Figma variables → CSS/TS tokens
 
