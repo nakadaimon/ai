@@ -1,3 +1,5 @@
+![ Rigorous Reasoning](rigorous-reasoning.jpeg)
+
 # rigorous-reasoning
 
 A general-purpose discipline for analyses where being confidently wrong is worse than being openly uncertain.
