@@ -25,6 +25,7 @@ Don't copy these files. Let your model draft yours. The scaffold is the contribu
 
 - **[Auto Graph Wiki](skills/auto-graph-wiki/)** — Automated regeneration of graph from frontmatter — 20x performance when querying LLM-wikis with NLAH and plain scripts.
 
+- **[Rigorous Reasoning](skills/rigorous-reasoning/)** — A brutal 1st principles intellectual discipline built to destroy the #1 way smart agents fail: Getting more confident the deeper they reason, while being completely wrong.
 
 ---
 
