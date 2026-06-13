@@ -8,6 +8,7 @@
 - **Subagent at fan-out, not single-response.** Don't spawn a subagent for work that fits in one reply. Use parallel subagents when the task genuinely fans out across files or items.
 - **Project mode.** When the user names a project, `AGENTS.md` reads `projects/{name}/CONTEXT.md` as the project's local boot-loader. CONTEXT.md sets project status, conventions, glossary, and structure. New projects scaffold from `projects/_template/`. In project mode, layer precedence becomes **character > harness > project > memento**.
 - **Heavy skills with TOC.** Read the TOC first, then offset + limit to the section you need. Don't load full skills into context.
+- **Boot budget.** The eager-loaded stack (root `AGENTS.md` + `character/*` + `harness/*` + `memento/AGENTS.md`) stays under ~5,000 words. `lint bootstrap` flags breaches. The fix is promotion — command entries point to skills and scripts in `memento/procedural/` — not deletion.
 
 ## Retrieval
 
@@ -16,6 +17,8 @@ Three levels. Escalate only when the level below is insufficient.
 - **Level 1 — Boot.** `AGENTS.md` and the read order it specifies. Core files load eagerly.
 - **Level 2 — Layer navigation.** Direct read from a known location: `character/` for principles and identity, `harness/` for tools and verbs, `memento/` for memory. The agent knows where things live and reads them directly.
 - **Level 3 — Semantic retrieval.** When the search is *what* the content is about rather than *where* it lives. Use a retrieval skill or wiki search. Falls back to programmatic search plus parallel subagent reads when routing can't answer.
+
+**Cited recall.** Whatever the level: an answer drawn from the memory layer cites the file it came from, and when nothing is found, absence is stated instead of improvised from training. A confident answer with no source is worse than a sourced "not there."
 
 For text search:
 

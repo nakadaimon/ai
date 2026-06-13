@@ -1,5 +1,3 @@
-![ SYMBIOSIS](symbiosis3.0.0.jpg)
-
 # symbiosis
 
 > Your LLM has Leonard Shelby's memory problem. Here's the symbiotic architecture I use to fix it.
@@ -24,7 +22,8 @@ workspace/
 ├── harness/              # how the work gets done
 │   ├── AGENTS.md         # domain-agent for harness
 │   ├── operations.md     # tools, workflows, review protocols
-│   └── commands.md       # triggers: ingest and lint
+│   ├── commands.md       # triggers the user invokes: ingest and lint
+│   └── hooks.md          # triggers the agent fires automatically
 ├── memento/              # what we've learned so far — four memory domains, one per memory type
 │   ├── AGENTS.md         # domain-agent for memento
 │   ├── episodic/         # specific events
@@ -35,14 +34,17 @@ workspace/
 │   │   └── ideas/        # workshop: drafts/ in motion, published/ once shipped (this file lives in published/)
 │   ├── procedural/       # automated patterns
 │   │   ├── skills/       # reusable patterns, loaded on demand (own catalog-agent when it grows)
-│   │   └── scripts/      # runnables — scheduled is just a script + a scheduler
+│   │   ├── scripts/      # runnables — scheduled is just a script + a scheduler
+│   │   ├── recipes/      # delegation briefs another actor runs (opt-in)
+│   │   ├── prompts/      # reusable prompt templates (opt-in)
+│   │   └── schematics/   # technical blueprints for agents that build (opt-in)
 │   └── prospective/      # future intentions
 │       └── tasks/        # inbox.md + tasks.md + log.md + raw/
 └── projects/             # where the work actually happens — one folder per project
     └── _template/        # scaffold; copy and adapt per project
 ```
 
-Every session starts by reading `AGENTS.md`, then the files in `character/`, `harness/`, and `memento/AGENTS.md`. Boot also checks `episodic/sessions/` for an in-progress session — if one exists, it resumes; if not, a fresh scratchpad opens. It surfaces what's in `prospective/tasks/` so the day's work is visible up front. The rest of `memento/` loads on demand.
+Every session starts by reading `AGENTS.md`, then the files in `character/`, `harness/`, and `memento/AGENTS.md`. Boot opens a scratchpad in `episodic/sessions/` before the first substantial work — resuming the in-progress one if it exists, creating a fresh file if not, so a crash or an exhausted context window always leaves a resume point behind. It surfaces what's in `prospective/tasks/` so the day's work is visible up front. The rest of `memento/` loads on demand.
 
 ## The architecture
 
@@ -70,6 +72,12 @@ This isn't just tidy — it's how LLMs navigate. Models reason better when they 
 
 That single line shifts the default. The model consults the structure before consulting its weights — opens the file instead of inventing what's plausible. The principle isn't "less context"; it's the right context at the right time. Everything else in the router works downstream of that rule.[^2]
 
+The same logic has a companion on the way out: **cited recall**. An answer drawn from the memory layer cites the file it came from, and when nothing is found, absence is stated instead of improvised from training. Retrieval-led reasoning governs how the model reads; cited recall governs how it answers — together they close the loop. A confident answer with no source is worse than a sourced "not there."
+
+### Storage, injection, recall
+
+A useful lens for comparing this architecture against other memory frameworks: every memory system has three jobs. *Storage* — what gets saved, and who decides. *Injection* — what loads into context at session start. *Recall* — how something old is found again. Symbiosis answers all three: `ingest` is storage (human-confirmed, synthesized, raw preserved underneath), the boot read order is injection (curated, budgeted, the same files every session), and the retrieval levels plus the wiki catalog are recall (cheapest level first, cited on the way out). Most frameworks solve one or two of the jobs; the reason this one is a structure rather than a library is that the three jobs share their substrate — the same files serve all three.
+
 ### Character
 
 `soul.md` and `identity.md` look similar from the outside, but they do different jobs. `soul.md` is the lens — values, stance, philosophy, how the model approaches the world. It's allowed to be abstract, because its job is to filter everything downstream, not to be followed. The `soul.md` convention comes from Peter Steinberger, who had Claude write its own[^3] — an inversion of the usual pattern where humans define AI values. `identity.md` is the opposite: role and operating principles, and the principles have to be testable. "Push back when my argument rests on unstated assumptions" — testable. "Be thoughtful" — not testable, doesn't belong. Principles do the heaviest lifting in the whole stack; fluff in `identity.md` is the most expensive fluff you can write, because it dilutes the ones that matter. Same testability filter applies to everything in `harness/` and `AGENTS.md`. `user.md` rounds out the layer — who you are and how you actually work, written plain.
@@ -78,7 +86,9 @@ The fourth character file is `symbiosis.md` — the contract. It specifies what 
 
 ### Harness
 
-How the work gets done. Two files carry the layer. `commands.md` lists the verbs — `ingest` and `lint` are load-bearing; everything else extends them. Keep entries short: one trigger, one outcome, one line each. `operations.md` lists the tools the model has access to (CLIs, MCPs, APIs) and the review protocols that sit between draft and delivery — humanizer, fact check, plan-mode for build tasks. Both files start small and stay small. Heavier patterns — supersedes-links, multi-agent validation, context-budget gates, staleness lints — live in *Operational extensions* below, where they can be adopted, adapted, or ignored without polluting the core.
+How the work gets done. Three files carry the layer. `commands.md` lists the verbs — `ingest` and `lint` are load-bearing; everything else extends them. Keep entries short: one trigger, one outcome, a few lines each; implementation detail lives in `memento/procedural/` as a skill or script the entry points to, because every word in the harness is paid for at boot. `operations.md` lists the tools the model has access to (CLIs, MCPs, APIs) and the review protocols that sit between draft and delivery — humanizer, fact check, plan-mode for build tasks. `hooks.md` is the mirror of `commands.md`: where commands are triggers the *user* invokes, hooks are deterministic *if-X-then-Y* rules the *agent* fires when an observable state is detected — a session-end phrase, a stale derived file, a captured task slipping by. Hooks load eagerly (they fire mid-work, so lazy-loading defeats the point), each carries a detection surface so adopters know what their runtime supports, and `lint hooks` keeps the table honest. Soft principles are not hooks; the split is testable — a hook trigger must be expressible as an observable state.
+
+All three files start small and stay small, enforced by a **boot budget**: the eager-loaded stack stays under ~5,000 words, and `lint bootstrap` flags breaches with promotion candidates. Heavier patterns — supersedes-links, multi-agent validation, context-budget gates, staleness lints — live in *Operational extensions* below, where they can be adopted, adapted, or ignored without polluting the core.
 
 ### Memento
 
@@ -88,9 +98,9 @@ The split isn't arbitrary. Cognitive science divides long-term memory into four 
 
 Each domain carries its own folders, with preserved sources sitting underneath:
 
-- **episodic** — `sessions/` is the live scratchpad, rewritten progressively. When a session ends — automatically detected or signaled by you — its scratchpad is archived to `sessions/raw/` with a `## Summary` block at the top, so the next instance can resume coherently. `lessons/` is the inbox for corrections, synthesized away into wiki or skills.
+- **episodic** — `sessions/` is the live scratchpad, created at session start and rewritten progressively — not opened conditionally on a "heavy" session, because the crash you didn't expect is the one the scratchpad exists for. When a session ends — automatically detected or signaled by you — its scratchpad is archived to `sessions/raw/` with a `## Summary` block at the top, so the next instance can resume coherently. `lessons/` is the inbox for corrections, synthesized away into wiki or skills.
 - **semantic** — `llm-wiki/` holds long-term synthesized knowledge. The pattern is Karpathy's[^5], with one addition: an `AGENTS.md` at the root that catalogs every page — summary, keywords, aliases, related pages, last updated. The model reads the catalog first and retrieves only the pages the task needs, instead of loading the wiki wholesale. The catalog is a flat table (`| Page | Summary | Keywords | Aliases | Related | Updated |`) with short `## topic` headers grouping related rows. Keep it shallow — the point is routing, not hierarchy. Source material sits in `raw/` underneath. The whole folder is Obsidian-compatible, so the same files work as a retrieval substrate for the model and as a navigable knowledge base for you. `ideas/` is the workshop where new semantic content forms — `drafts/` while a piece is still moving, `published/` once it ships (this file lives in `published/`). Drafts either graduate — become a skill, a wiki page, a rule, or something you put into the world — or get dropped with a note on why. Ideas belong to semantic because that's where ideas are made: by retrieving, combining, and reasoning over concepts and their relationships.
-- **procedural** — `skills/` is muscle memory, reusable patterns loaded on demand. `scripts/` is runnables; a scheduled task is just a script plus a scheduler hook.
+- **procedural** — `skills/` is muscle memory, reusable patterns loaded on demand. `scripts/` is runnables; a scheduled task is just a script plus a scheduler hook. Three opt-in folders join as they earn their place: `recipes/` holds delegation briefs — complete Discovery → Gate → Plan → Execute packages another actor runs on their own; `prompts/` holds reusable prompt templates that recipes and skills reference; `schematics/` holds technical blueprints for agents that build — architecture, data models, API specs. Blueprint, not process. Don't pre-create them; add each when the first real artifact of its kind appears.
 - **prospective** — `tasks/` follows a stripped-down GTD logic[^6]: `inbox.md` captures anything you want offloaded — todos, ideas, half-formed thoughts; reference material lands in `raw/` alongside until processed. The agent sorts items into `tasks.md` by state (now/next/waiting/blocked — your call); completed items drop to `log.md`.
 
 A real project fans out across the four. A pricing project might land active tasks in `prospective/tasks/`, a draft proposal in `semantic/ideas/drafts/`, source research in `semantic/llm-wiki/raw/`, and corrections from past calls in `episodic/lessons/`. The taxonomy in memento is by memory type, not by project, because that's what makes the layer transferable across new projects without rearrangement. Project artifacts themselves — the work, not the memory of it — live in `projects/`, covered next.
@@ -140,13 +150,17 @@ The structure is static. Two verbs keep it alive. This is the symbiosis in actio
 
 **Ingest** moves signal up. Sessions become lessons. Lessons become wiki or skills. Skills that run regularly become scripts; scripts that run on cadence become scheduled automation. Manual → skill → script → scheduled is the full ladder, and each step removes one more human hand. Every pattern that repeats gets promoted; every one-off dies with the session. This is how the layer gets smarter instead of just bigger.
 
-**Lint** catches drift. Anything in the structure can be linted — the wiki for broken cross-references and stale facts, the config stack for rules pointing at missing files, the skills for version drift, the contract itself for signs of dependence or missing pushback. Lint is how the system self-corrects.
+**Lint** catches drift. Anything in the structure can be linted — the wiki for broken cross-references and stale facts, the config stack for rules pointing at missing files, the skills for version drift, the hooks for subjective triggers, the contract itself for signs of dependence or missing pushback. Lint is how the system self-corrects.
 
-Both are short commands that run on signal, not calendar: `ingest session`, `ingest lessons`, `ingest ideas`, `ingest tasks`, `lint bootstrap`, `lint wiki`, `lint skills`, `lint subtraction`, `lint symbiosis`. Findings split into (a) safe autofix and (b) editorial calls that need judgment. Muscle memory comes from the brevity — short verbs, short nouns, short passes.
+Both are short commands that run on signal, not calendar: `ingest session`, `ingest lessons`, `ingest ideas`, `ingest tasks`, `ingest status`, `lint bootstrap`, `lint wiki`, `lint skills`, `lint hooks`, `lint subtraction`, `lint symbiosis`. Findings split into (a) safe autofix and (b) editorial calls that need judgment. Muscle memory comes from the brevity — short verbs, short nouns, short passes.
+
+`ingest status` deserves a note, because capture points multiply as the layer grows — a task inbox, lesson files, an ideas backlog, wiki inboxes, project inboxes — and each has its own ingest pass. No single inbox signals when the whole set is falling behind, and *maintenance collapses* is an exit criterion. `ingest status` is the counter: one cheap pass that scans every capture point and reports unprocessed entries per inbox with the suggested pass for each. Run it when you suspect you're behind; let it tell you where.
 
 Signals come in two kinds. **State-based:** scratchpad over ~2k tokens triggers `ingest session`; a corrected mistake worth keeping triggers `ingest lessons`; a draft that has stopped moving triggers `ingest ideas`; a retrieval that returns a stale fact triggers `lint wiki`. **Calendar-based:** `lint subtraction` runs once a quarter regardless. Mixed cadence is correct — some signals are state, some are clock; the rule is that the trigger is named, not improvised.
 
-`lint subtraction` deserves a note. Once a quarter, walk the config stack and ask two questions of every section: *can this rule be removed without breaking anything?* and *does this content already live in a skill?* The default reflex — mine and the model's — is to accumulate. Subtraction has to be scheduled against that pull. Half the rules in my harness today wouldn't survive a strict subtraction pass. That's the point.
+`lint subtraction` deserves one too. Once a quarter, walk the config stack and ask two questions of every section: *can this rule be removed without breaking anything?* and *does this content already live in a skill?* The default reflex — mine and the model's — is to accumulate. Subtraction has to be scheduled against that pull. Half the rules in my harness today wouldn't survive a strict subtraction pass. That's the point.
+
+From 4.0.0, subtraction carries two measurements so the answers are evidence, not intuition. **Ablation light:** for a rule under question, run a small eval deck — 5–10 recurring task types from your actual work — with and without the rule; no measurable delta means the rule isn't pulling weight and is a removal candidate.[^11] **Boot metric:** record the eager stack's word count at every release; growth between quarters is the smell that triggers subtraction early. Neither requires tooling — a deck is a list of prompts, a metric is a number in the changelog.
 
 Without the loops the structure ossifies. The wiki goes stale, the inbox overflows, the contract becomes myth. The layer is only as sharp as the maintenance it gets.
 
@@ -170,9 +184,9 @@ If any of those happens, I archive the memento layer, freeze the wiki, and strip
 
 Don't copy my files — let the model draft yours. The scaffold is the contribution; the content inside (principles, operations, philosophy) is yours to define. I haven't shown mine on purpose. I don't want to bake my rules into a shared discipline.
 
-A quick orientation on the vocabulary before you start. **`AGENTS.md`** is the router — a short index file naming what to read in what order. **`soul.md`** is the lens (values, stance). **`identity.md`** is your operating manual for the model — testable principles only. **`user.md`** is you. **`symbiosis.md`** is the contract — what each side commits to. **`memento`** is the memory layer, named after the Nolan film. **`ingest`** promotes signal upward (sessions → lessons → wiki/skills). **`lint`** catches drift (stale facts, dead rules, contract slippage). Both `ingest` and `lint` are conversational verbs you say to the model — not scripts. The model does the work. Some can be wired up as scheduled tasks where the runtime supports it; day one, all manual.
+A quick orientation on the vocabulary before you start. **`AGENTS.md`** is the router — a short index file naming what to read in what order. **`soul.md`** is the lens (values, stance). **`identity.md`** is your operating manual for the model — testable principles only. **`user.md`** is you. **`symbiosis.md`** is the contract — what each side commits to. **`memento`** is the memory layer, named after the Nolan film. **`ingest`** promotes signal upward (sessions → lessons → wiki/skills). **`lint`** catches drift (stale facts, dead rules, contract slippage). **`hooks`** are the mirror of the verbs — triggers the agent fires automatically when it observes a state, where commands wait for you to speak. Both `ingest` and `lint` are conversational verbs you say to the model — not scripts. The model does the work. Some can be wired up as scheduled tasks where the runtime supports it; day one, all manual.
 
-Start minimal. Create `AGENTS.md`, a `character/` folder, a `harness/` folder, and `memento/episodic/` with `sessions/` and `lessons/` inside. The other three domains (`semantic/`, `procedural/`, `prospective/`) can wait — add them when a need shows up. `projects/` is added when work starts; the template lives at `projects/_template/`.
+Start minimal. Create `AGENTS.md`, a `character/` folder, a `harness/` folder, and two memento domains: `memento/episodic/` with `sessions/` and `lessons/` inside, and `memento/prospective/tasks/` with its three files — the boot sequence and the `capture` verb point there from day one, so leaving it out leaves dangling paths. The other two domains (`semantic/`, `procedural/`) can wait — add them when a need shows up. `projects/` is added when work starts; the template lives at `projects/_template/`.
 
 Two practical notes. If you're using git, empty folders vanish — drop a `.gitkeep` in each one you haven't filled yet so the structure is preserved as a contract even when the content isn't. If you're not using git, the folders work as-is. And the scaffold is language-agnostic: write every file in whatever language the work actually happens in. The structure doesn't care.
 
@@ -188,7 +202,7 @@ The first session bootstraps the files. The second runs against them. From there
 
 ## If the model is the builder
 
-If you're an agent bootstrapping this on someone else's behalf — not your own — the paste-prompt above is your interview script, not your preamble. Draft the architecture in two passes. First pass: the directory tree and the root `AGENTS.md`. Pause for orientation — let the user see the shape before you fill it. Second pass: `harness/operations.md`, `harness/commands.md`, `memento/AGENTS.md` (and the `llm-wiki/AGENTS.md` stub if semantic is in scope from day one). Do not draft `user.md`, `identity.md`, or `symbiosis.md` yet — those encode the person's stance on pushback, tone, language, and red lines, and the cost of guessing wrong lands directly on them. The split: architecture without permission; stance only after it.
+If you're an agent bootstrapping this on someone else's behalf — not your own — the paste-prompt above is your interview script, not your preamble. Draft the architecture in two passes. First pass: the directory tree and the root `AGENTS.md`. Pause for orientation — let the user see the shape before you fill it. Second pass: `harness/operations.md`, `harness/commands.md`, `harness/hooks.md`, `memento/AGENTS.md` (and the `llm-wiki/AGENTS.md` stub if semantic is in scope from day one). `hooks.md` starts as the three generic starters in the scaffold below and grows as the user's own observable triggers emerge — but only add a hook whose action already exists in `commands.md`. Do not draft `user.md`, `identity.md`, or `symbiosis.md` yet — those encode the person's stance on pushback, tone, language, and red lines, and the cost of guessing wrong lands directly on them. The split: architecture without permission; stance only after it.
 
 `soul.md` is a special case. Draft it last, by writing it yourself as the model — reflect on the bootstrap conversation you just had and produce the lens. The user edits, doesn't dictate. This honors the Steinberger pattern: the model is the author of its own soul document. A bootstrap that ends without `soul.md` boots fine but ships without the lens — fine for one session, not fine long-term.
 
@@ -196,11 +210,17 @@ If you're an agent bootstrapping this on someone else's behalf — not your own 
 
 `commands.md`:
 ```markdown
+## capture
+Append a line to memento/prospective/tasks/inbox.md. Unformatted.
+
 ## ingest session
 Promote signal from the live scratchpad into lessons.
 
 ## lint subtraction
 Quarterly. Walk every rule and ask: can this be removed without breaking anything?
+
+## Session end
+Archive the scratchpad to sessions/raw/ with a ## Summary block. Show open tasks.
 ```
 
 `operations.md`:
@@ -212,7 +232,20 @@ What the model has access to — CLIs, MCPs, APIs. Concrete, not aspirational.
 Gates before delivery — humanizer, fact check, plan-mode for build tasks.
 ```
 
-Two entries each. The user will add more as patterns emerge.
+Keep the scaffolds this small. The user will add more as patterns emerge. The `capture` and `Session end` entries are there because the starter hooks point at them — **a hook enters the table only when its action exists** (that's `lint hooks` check 2, applied at bootstrap).
+
+`hooks.md`:
+```markdown
+# Hooks
+
+> Triggers the agent fires automatically. A trigger must be an observable state.
+
+| Hook | Trigger | Action | Surface |
+|---|---|---|---|
+| session-end-detect | User signals the session is over ("bye", "thanks for today") | Run Session end in commands.md | phrase |
+| capture-detect | A phrase that is clearly a future task ("I should check X") | Run capture | phrase |
+| derived-follow-source | A source file is newer than its derived artifact (index, catalog) | Regenerate the derived artifact | filesystem |
+```
 
 **File shape for `memento/AGENTS.md`.** This is the entry to the memory layer. Loads on boot for `episodic/`; the rest of the four domains load on demand. Keep it short — a one-line summary of what each domain holds.
 
@@ -367,7 +400,9 @@ The architecture above is the concept. Everything that follows is operational �
 
 **70% context-budget gate.** When the session reaches about 70% of context capacity, pause and propose either compaction or handoff. Reactive context management is too late — by the time the window is full, structure is already gone. Most agent runtimes expose a configurable threshold; set it before the session, not during.
 
-**`lint ablate` for individual rules.** Every harness rule earns its place by surviving an ablation: run a small eval-deck twice, once with the rule, once without; if no measurable delta, flag for removal. Subtraction has a habit of accumulating against itself — this mechanizes it.[^11]
+**`lint ablate`, fully mechanized.** The core ships ablation light (see *The two loops*); the full version makes it systematic: every harness rule earns its place by surviving an ablation on a standing eval-deck, with trigger-rate tracked per rule over time. Heavier than most solo setups need — adopt when the harness has grown past what a quarterly manual pass can cover.
+
+**`lint release` — maintainer tooling.** If you maintain a published reference of your architecture (or a team-shared variant), diff your live structure against it on a cadence and flag drift: files that exist in one but not the other, rules that evolved in the field without being promoted, naming that diverged. It's the ingest loop applied to the framework itself. Maintainer-side only — adopters running a single deployment don't need it.
 
 **`lint staleness` against the `Updated` column.** Flag wiki pages whose `Updated` date is older than a category-keyed TTL (api-reference: 30d, principle: 365d, default: 180d). Uses the existing column; no new schema. Catches the most common drift mode in any knowledge base — facts that were true once.[^12]
 
@@ -375,13 +410,13 @@ The architecture above is the concept. Everything that follows is operational �
 
 None of this is new. I'm standing on giants — Nolan for *Memento*, Steinberger for `soul.md`, Karpathy for the `llm-wiki` pattern and for showing that a short idea document can change how a lot of people work. Allen for *Getting Things Done* and the inbox/next-actions/log pattern that `prospective/` stripped down to its load-bearing parts. What's new here is the arrangement and the relationships between the pieces. The skeleton is mine; hang your own work on it.
 
-Version: 3.0.0
+Version: 4.0.0
 License: MIT
 Author: Nakadai
 
 ---
 
-[^1]: [AGENTS.md](https://agents.md/) — open standard stewarded by the Agentic AI Foundation under the Linux Foundation. Used by 60,000+ projects. Hierarchical discovery: agents read the nearest file in the directory tree, with closer files taking precedence. Supported natively by Codex, Cursor, Aider, Gemini, Jules, Factory, GitHub Copilot, and others. Claude Code reads `CLAUDE.md` instead — symlink with `ln -s AGENTS.md CLAUDE.md` if you need both.
+[^1]: [AGENTS.md](https://agents.md/) — open standard stewarded by the Agentic AI Foundation under the Linux Foundation. Used by 60,000+ projects. Hierarchical discovery: agents read the nearest file in the directory tree, with closer files taking precedence. Supported natively by Codex, Cursor, Aider, Gemini, Jules, Factory, GitHub Copilot, and others. Claude Code reads `CLAUDE.md` instead — symlink with `ln -s AGENTS.md CLAUDE.md` if you need both, or, if a terminal isn't your thing, create a `CLAUDE.md` containing the single line `Read AGENTS.md and follow it.`
 [^2]: Vercel Engineering, [AGENTS.md outperforms skills in our agent evals](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) — the finding that a static docs index in AGENTS.md beat skill-based retrieval across their evals (100% vs 79%), and the source of the retrieval-over-pretraining framing.
 [^3]: Peter Steinberger, [soul.md](https://soul.md/) — the original `soul.md` was generated by Claude itself reflecting on its own existence, making the agent the author of its own soul document.
 [^4]: Tulving (1985) for the episodic/semantic distinction; Squire & Zola (1996) for procedural; Einstein & McDaniel (1990) for prospective. The four-way split is the standard taxonomy in long-term memory research.

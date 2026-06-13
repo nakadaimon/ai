@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> The symbiosis architecture (v3.0.0). This file boots the structure; the actual work lives one level down.
+> The symbiosis architecture (v4.0.0). This file boots the structure; the actual work lives one level down.
 
 > Prefer retrieval-led reasoning over pre-training-led reasoning. Open the file before guessing what it says.
 
@@ -14,16 +14,17 @@
 4. `character/symbiosis.md` — the contract
 5. `harness/operations.md` — tools and review protocols
 6. `harness/commands.md` — verbs (`ingest`, `lint`)
-7. `memento/AGENTS.md` — the memory layer
+7. `harness/hooks.md` — automatic triggers the agent fires
+8. `memento/AGENTS.md` — the memory layer
 
 When layers conflict: **character > harness > memento**. In project mode: **character > harness > project > memento** — local project context overrides general history. Values filter tools; tools filter history.
 
 ## Session start
 
 1. Read the files above in order.
-2. Check `memento/episodic/sessions/` for an in-progress scratchpad — resume if present, otherwise open a fresh one.
+2. Open a scratchpad in `memento/episodic/sessions/` before the first substantial work — resume the in-progress one if present, otherwise create a fresh file immediately. The topic can be preliminary; rename if the session changes direction. If the runtime crashes or the context window runs out, the scratchpad is the next instance's resume point — which is why it exists from the start, not from the first "heavy" moment.
 3. Surface anything in `memento/prospective/tasks/tasks.md` so the day's work is visible.
 4. **Project mode:** if a project is named — in platform-level instructions, env, or the user's first message — read `projects/{name}/CONTEXT.md` and treat it as the local boot-loader. If `projects/{name}/` exists but lacks `CONTEXT.md`, offer to scaffold from `projects/_template/CONTEXT.md`. If the named project doesn't exist, confirm before creating.
 5. The rest of `memento/` loads on demand.
 
-> Claude Code reads `CLAUDE.md` instead of `AGENTS.md`. If you're on Claude Code, symlink: `ln -s AGENTS.md CLAUDE.md`.
+> Claude Code reads `CLAUDE.md` instead of `AGENTS.md`. If you're on Claude Code, symlink: `ln -s AGENTS.md CLAUDE.md`. No terminal? Create a `CLAUDE.md` containing a single line: `Read AGENTS.md and follow it.`

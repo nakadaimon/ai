@@ -12,7 +12,7 @@ Synthesized knowledge: `llm-wiki/` (catalog + pages + raw), `ideas/` (drafts/pub
 
 ## procedural/
 
-Reusable patterns: `skills/` (loaded on demand), `scripts/` (runnables).
+Reusable patterns: `skills/` (loaded on demand), `scripts/` (runnables). Opt-in as they earn their place: `recipes/` (delegation briefs — Discovery → Gate → Plan → Execute packages another actor runs), `prompts/` (reusable prompt templates that recipes and skills reference), `schematics/` (technical blueprints for agents that build — architecture, data models, API specs).
 
 ## prospective/
 
