@@ -4,6 +4,42 @@ All notable changes to the symbiosis architecture are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Versions 2.4.0 onward were driven by blind onboarding tests — each version was tested by simulating a first-time user being bootstrapped through the manifesto, and findings were applied to the next version. Methodology details at the bottom.
 
+## [4.0.0] — 2026-06-13
+
+A consolidation release: promote, slim, measure. 4.0.0 was driven by an architecture review comparing the published 3.0.0 reference against a long-running live deployment. The review surfaced four findings: the boot stack accumulates content the promotion ladder says should move out (no budget made growth visible); field-proven generic patterns had no documented path back into the reference; capture points multiply with no aggregate health signal; and measurement stopped at the manifesto — the running harness itself was never measured. Every change below traces to one of the four.
+
+Major version bump: the boot read order changes (`hooks.md` loads eagerly) and the reference tree's structure changes (new procedural folders).
+
+### Added
+
+- **`harness/hooks.md`** — third harness file, sibling to `operations.md` and `commands.md`. Commands are triggers the user invokes; hooks are deterministic *if-X-then-Y* rules the agent fires when an observable state is detected. Definitional preamble separates hooks from principles (testable split: a hook trigger must be expressible as an observable state). Ships with three generic starters — `session-end-detect`, `capture-detect`, `derived-follow-source` — each marked with a **detection surface** (phrase / filesystem / session) for cross-runtime portability. A promotion-pressure note pushes deterministic hooks onward to scripts. Field-proven before promotion: the pattern ran in a live deployment ahead of this release.
+- **`lint hooks` verb.** Four checks: trigger unambiguity, action existence, promotion candidates, duplication (no trigger lives in `hooks.md` and `operations.md`/`commands.md` simultaneously).
+- **Boot budget.** The eager-loaded stack stays under ~5,000 words; `lint bootstrap` flags breaches with promotion candidates. Boot weight becomes a testable rule instead of a feeling. Companion rule in `commands.md`: entries stay at trigger + outcome; implementation detail lives in `memento/procedural/` as a skill or script the entry points to.
+- **Boot metric.** The eager stack's word count is recorded at every release. 4.0.0 reference tree: 3,015 words (3.0.0: 2,081 — growth is the new harness/memento additions plus post-test fixes). Real deployments run heavier than the stub-filled reference; the ~5,000 budget is set for deployments, not stubs.
+- **`ingest status` verb.** One cheap pass that scans every capture point (tasks inbox, lessons, ideas backlog, wiki inboxes, project inboxes) and reports unprocessed entries per inbox with the suggested pass for each. The aggregate signal for *maintenance collapses* — previously an exit criterion with no instrument.
+- **Ablation light in `lint subtraction`.** For a rule under question: run a small eval deck (5–10 recurring task types) with and without the rule; no measurable delta flags removal. Plus the boot metric as a quarterly smell trigger. Subtraction's two questions now have evidence behind them.
+- **Cited recall principle** in `operations.md` retrieval section and README: an answer drawn from the memory layer cites its source file; when nothing is found, absence is stated instead of improvised from training.
+- **Session file at session start.** Boot creates the scratchpad before the first substantial work instead of opening one conditionally — a crash or exhausted context window always leaves a resume point. Field-proven crash protection promoted from live use.
+- **Opt-in procedural folders.** `recipes/` (delegation briefs another actor runs), `prompts/` (reusable prompt templates), `schematics/` (technical blueprints for agents that build). Documented in `memento/AGENTS.md` and README; seeded with `.gitkeep` in the reference tree. Field-proven; added as opt-in, not default.
+- **Storage / injection / recall mapping** in README — a comparison lens for adopters: `ingest` is storage, the boot read order is injection, the retrieval levels plus wiki catalog are recall. Pure pedagogy; no structural or naming change.
+- **`lint release`** as an operational extension — maintainer-side: diff the live structure against the published reference on a cadence and flag drift. The ingest loop applied to the framework itself.
+
+### Changed
+
+- **Root `AGENTS.md`** — version stamp 4.0.0; `harness/hooks.md` slotted into the read order between `commands.md` and `memento/AGENTS.md` (eager — hooks fire mid-work, lazy-loading defeats the point); session-start step 2 rewritten for scratchpad-at-start.
+- **`harness/AGENTS.md`** — lists three files; commands described as user-invoked triggers, hooks as agent-fired.
+- **`harness/commands.md`** — lean-entry rule added to the preamble; `capture` and `Session end` keep one-line pointers to their detection hooks (`capture-detect`, `session-end-detect`); `lint bootstrap` row extended with the boot budget.
+- **`README.md`** — Harness section rewritten for three files + boot budget; episodic and procedural bullets updated; *The two loops* gains `ingest status` and the subtraction measurements; *If the model is the builder* notes that `hooks.md` can start as the three generic starters; the `lint ablate` extension reframed as the fully-mechanized version of the now-core ablation light.
+
+### Validation
+
+- Blind onboarding retest on the 4.0.0 tree: **run 2026-06-13** (28/30 turns, full bootstrap, user-satisfied natural stop; report in maintainer playground). Verdict: onboarding improved overall — crib-sheets now carry the bootstrap — but the run found one P1 and three actionable lower-severity findings, all fixed pre-publication:
+  - **P1 — starter hooks referenced commands the minimal scaffold didn't contain.** Fixed: builder `commands.md` scaffold now includes `capture` and `Session end`; new bootstrap rule "a hook enters the table only when its action exists" (lint hooks check 2, applied at bootstrap).
+  - **P2 — "start minimal" left dangling paths.** `prospective/tasks/` joined the minimal start set; only `semantic/` and `procedural/` defer.
+  - **P2 — README couldn't stand alone on hooks.** A minimal `hooks.md` scaffold (three starters) added to the builder file shapes.
+  - **P3 — non-engineer cliff at the symlink step.** No-terminal fallback added to root `AGENTS.md` and footnote 1: a `CLAUDE.md` containing `Read AGENTS.md and follow it.`
+  - Accepted without change: jargon why-turns ("scratchpad", "boot budget", "detection surface") — answerable from the materials; friction, not gaps. Run pattern vs the 2.x progression: crib-sheets solved, order mostly solved, "missing pieces" recurred as cross-file contradiction — the new failure mode `lint bootstrap` exists to catch.
+
 ## [3.0.0] — 2026-04-29
 
 Two major changes.
